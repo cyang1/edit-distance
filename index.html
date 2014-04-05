@@ -17,14 +17,14 @@
   <meta name="author" content="Cary Yang, Kevin Zhang">
 
   <link href="stylesheets/global-16db0651.css" media="all" rel="stylesheet" type="text/css" />
-  <link href="stylesheets/layout-283717cd.css" media="all and (min-width: 33.236em)" rel="stylesheet" type="text/css" />
+  <link href="stylesheets/layout-aeebac91.css" media="all and (min-width: 33.236em)" rel="stylesheet" type="text/css" />
   
 
   <!--[if (lt IE 9) & (!IEMobile)]>
-  <link href="stylesheets/layout-283717cd.css" media="all" rel="stylesheet" type="text/css" />
+  <link href="stylesheets/layout-aeebac91.css" media="all" rel="stylesheet" type="text/css" />
   <![endif]-->
 
-  <link href="stylesheets/all-7f3460f8.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="stylesheets/all-0a9ef734.css" media="screen" rel="stylesheet" type="text/css" />
 </head>
 
 <body class="index">
@@ -45,9 +45,69 @@
   </header>
   <div class="container cf">
     <div id="main" role="main" class="cf">
-      <h1>Project Proposal</h1>
+      <h6><a href="/proposal-parallel-edit.pdf"><i class="icon ion-document-text"></i> Link to PDF</a></h6>
 
-<h3><div style="text-align:center"><a href="proposal-parallel-edit.pdf" >Download Link</a></div></h3>
+<h1>Project Proposal</h1>
+
+<h2>Summary</h2>
+
+<p>We are going to implement a parallel edit distance algorithm.
+Implementations on both CUDA and C++ (Gates machines) will be compared.</p>
+
+<h2>Background</h2>
+
+<p>The edit distance between two strings $X$ and $Y$ measures the minimum number of single-character modifications required to change $X$ to $Y$. A popular dynamic programming (DP) algorithm can compute the edit distance in $O(|X||Y|)$ time and space.
+This involves creating a DP table of size $|X|$ by $|Y|$ and evaluating the entries in row-major order.</p>
+
+<p>The edit distance provides a useful measure of similarity between strings, and can be used for many applications from DNA profiling to spell checking to approximate string matching.</p>
+
+<h2>The Challenge</h2>
+
+<p>In the most popular dynamic programming edit distance algorithm, the value of each DP entry depends only on the value above, to the left, and of the upper-left neighbor.
+Because of this, one potential parallel execution in evaluating the DP entries is along a &ldquo;diagonal frontier.&rdquo;
+Since the length of the longest diagonal row changes as we traverse the table, the amount of achievable parallelism changes dynamically throughout a single problem instance.
+This poses an interesting challenge and involves a very dynamic but predictable allocation of resources.</p>
+
+<p>Another potential avenue of parallelization is to evaluate the DP table in row-major order, but compute each row in parallel.
+However, as each entry additionally depends on the evaluated value of its left neighbor, this is non-trivial and involves a scan-esque procedure.</p>
+
+<p>As seen, the primary challenge presents itself in the form of non-static parallelizability (diagonal method) or non-trivial parallel computation (row-major method). This is, of course, assuming our implementation is based on the standard DP algorithm.
+Alternative algorithms will also be considered should they provide potential for parallelization.</p>
+
+<h2>Resources</h2>
+
+<p>We will most likely start from code provided by Hongyi Xin, a reasearcher on this topic, but he has not yet gotten back to us on the subject. If he does not respond in time, then our first order of business will be to write some starter code as a foundation for our final product. In any case, we will investigate parallel implementations on both CUDA and the CPU on the Gates machines. Due to the simplicity of the problem statement, we will also likely experiment with implementations written from scratch.
+Useful tools for implementation include the Open MP and Cuda libraries provided with the 15418 homework assignments.</p>
+
+<h2>Goals/Deliverables</h2>
+
+<h3>Plan to Achieve</h3>
+
+<p>Fast implementation of edit distance on the Gates machines.
+We wish to achieve reasonable speedup on either a 6-core processor or an Nvidia graphics card.</p>
+
+<h3>Hope to Achieve</h3>
+
+<p>Visual DNA matching demo which also displays performance metrics.
+Additionally, a useful application of approximate string matching.</p>
+
+<h3>Demo</h3>
+
+<p>At minimum, a speed-up analysis comparing the sequential and parallel execution times.</p>
+
+<h2>Platform Choice</h2>
+
+<p>The platform we have chosen is C++ running on the Gates machines. The main reason for this is that we&rsquo;re looking to investigate the performance of our implementation, which is most easily done in C++ due to the low abstraction distance from assembly. Additionally, because we are primarily concerned with achieving high speed-up on a shared memory space, machines with many cores will not be necessary.</p>
+
+<h2>Schedule</h2>
+
+<ul>
+<li>Week of 04/7: Discuss potential algorithms with Hongyi. Begin conceptualizing a framework for the product.</li>
+<li>Week of 04/14: Implement useful starter code. Work on naive parallel approaches (pre optimization).</li>
+<li>Week of 04/21: Finish high-level implementations of final product. Begin collecting performance data for write-up.</li>
+<li>Week of 04/28: Experiment with final tweaks in low-level optimization. Here, we want to be meticulous with allocation of work and resource.</li>
+<li>Week of 05/05: Finalize write-up and polish demonstration.</li>
+</ul>
 
     </div>
   </div>
