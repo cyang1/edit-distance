@@ -114,8 +114,18 @@ nav ul {
 }
 
 #main {
-    p, ul {
+    p, ul, h3, h4, h5 {
         float: right;
+        clear: right;
+        min-width: 30em;
+    }
+
+    // This one is only used for the download link.
+    h6 {
+        float: none;
+        text-align: right;
+        text-transform: uppercase;
+        font-size: 0.8em;
     }
 }
 

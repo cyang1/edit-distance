@@ -30,11 +30,11 @@ h1 span:before, h1 span:after {
 h1 span:before { float: left; }
 h1 span:after { float: right; }
 
-aside {
+h2 {
   float: left;
-  clear: left;
+  clear: both;
   width: 16em;
-  margin-bottom: 5em;
+  line-height: 1.618em;
   height:auto;
 
   text-align: right;
@@ -52,7 +52,7 @@ h1 { font-size: 2.618em; line-height: 1.4em; }
 h1 span { font-size:0.5em; }
 h1 span:before, h1 span:after { width: 10%; }
 
-aside {
+h2 {
   float: none;
   width: auto;
   height: auto;
