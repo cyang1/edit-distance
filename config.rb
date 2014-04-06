@@ -56,6 +56,9 @@ set :markdown, :fenced_code_blocks => true, :smartypants => true, :lax_spacing =
 #   end
 # end
 
+# Make all link_to helpers relative.
+set :relative_links, true
+
 set :css_dir, 'stylesheets'
 
 set :js_dir, 'javascripts'
