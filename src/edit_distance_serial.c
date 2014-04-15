@@ -1,24 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int edit_distance_serial(char* s1, int n1, char* s2, int n2);
 
-int main() {
+int main(int argc, char** args) {
 
-	char* test1 = (char*)malloc(4);
-	test1[0] = 'a';
-	test1[1] = 'b';
-	test1[2] = 'c';
-	test1[3] = '\0';
-	
-	char* test2 = (char*)malloc(4);
-	test2[0] = 'b';
-	test2[1] = 'c';
-	test2[2] = 'd';
-	test2[3] = 'e';
-	test2[4] = '\0';
+	if (argc != 3) {
+		printf("Usage: ./edit_distance_serial str1 str2\n");
+		exit(0);
+	}
 
-	printf("Distance: %d\n", edit_distance_serial(test1, 3, test2, 4));
+	int n1 = strlen(args[1]), n2 = strlen(args[2]);
+	printf("Distance: %d\n", edit_distance_serial(args[1], n1, args[2], n2));
 }
 
 
@@ -50,7 +44,6 @@ int edit_distance_serial(char* s1, int n1, char* s2, int n2) {
 				int up = prevLine[c], left = currentLine[c-1], upLeft = prevLine[c-1];
 				int min = up < left ? up : left;
 				min = min < upLeft ? min : upLeft;
-				
 				currentLine[c] = min + 1;
 			}
 		}
@@ -63,5 +56,4 @@ int edit_distance_serial(char* s1, int n1, char* s2, int n2) {
 	int answer = currentLine[n2-1];
 	free(prevLine); free(currentLine);
 	return answer;
-	
 }
