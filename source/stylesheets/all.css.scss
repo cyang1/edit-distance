@@ -120,6 +120,10 @@ nav ul {
         min-width: 30em;
     }
 
+    ul ul {
+        float: none;
+    }
+
     // This one is only used for the download link.
     h6 {
         float: none;
