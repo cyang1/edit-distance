@@ -1,0 +1,14 @@
+Time for [Generating 1 strings of size 50000 and 50000]: 18ms
+Time for [Edit Distance Row]: 11858ms
+Time for [Edit Distance Diag]: 26343ms
+Time for [Edit Distance Diag Parallel]: 6662ms
+Time for [Correctness Check]: 0ms
+Speed up on 6 threads: 3.954217952566797
+
+
+Time for [Generating 1 strings of size 50000 and 100000]: 19ms
+Time for [Edit Distance Row]: 23718ms
+Time for [Edit Distance Diag]: 56093ms
+Time for [Edit Distance Diag Parallel]: 13335ms
+Time for [Correctness Check]: 0ms
+Speed up on 6 threads: 4.206449193850768
