@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine or request Chrome Frame -->
+  <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+  <meta http-equiv="cleartype" content="on">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Use title if it's in the page YAML frontmatter -->
+  <title>Project Checkpoint | 15-418 Spring 2014</title>
+  <meta name="description" content="Investigating the runtimes and practicality of different approximate string matching algorithms.">
+  <meta name="author" content="Cary Yang, Kevin Zhang">
+
+  <link href="stylesheets/global-bcdfe8c8.css" media="all" rel="stylesheet" type="text/css" />
+  <link href="stylesheets/layout-aeebac91.css" media="all and (min-width: 33.236em)" rel="stylesheet" type="text/css" />
+  
+
+  <!--[if (lt IE 9) & (!IEMobile)]>
+  <link href="stylesheets/layout-aeebac91.css" media="all" rel="stylesheet" type="text/css" />
+  <![endif]-->
+
+  <link href="stylesheets/all-13a752a2.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="checkpoint">
+  <header>
+    <div class="container">
+      <div class="title">
+        <a href=".">Approximate String Matching</a>
+        <div>Cary Yang (caryy), Kevin Zhang (kkz)</div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="proposal.html">Proposal</a></li>
+          <li><a href="checkpoint.html">Checkpoint</a></li>
+          <li><a href="#" disabled="true" title="May 9th">Final Writeup</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <div class="container cf">
+    <div id="main" role="main" class="cf">
+      <h1>Project Checkpoint</h1>
+
+<h2>Work Completed So Far</h2>
+
+<p>Having met with Hongyi, a researcher in this field, we now have several avenues of approach for implementing a parallelized edit distance. He pointed us towards a <a href="http://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf">fast bit-vector algorithm for approximate string matching</a>, which shows promise in parallization over the naive approach.</p>
+
+<p>A serial implementation along with a timing mechanism is now complete; multiple input formats are supported. The gathering of necessary libraries and code bases are now complete, allowing us to begin implementation without further obstruction.</p>
+
+<h2>Goals/Deliverables</h2>
+
+<h3>Challenges</h3>
+
+<p>The primary challenge in the pthread implementation (with diagonal parallelization on the DP table) lies in dealing with dynamic scheduling and resource allocation which is necessitated by the non-static nature of the amount of parallelism available throughout a single problem instance. Furthermore, we must be careful in how we arrange data on memory in order to take advantage of locality. Currently, we plan on a “diagonal-major” ordering of the DP table. However, this is non-trivial as the diagonals are of variable length.</p>
+
+<p>For the bit-vector implementation, the main challenge lies in communicating the information at each step between the parallel executing units. A simpler solution might just be to keep all the execution between one warp on the GPU so that the algorithm runs in lock-step, but this limits the possible speedup and the input size. If this were implemented on multiple warps, it is likely that barriers would have to be used, reducing the potential speedup.</p>
+
+<h3>Plan to Achieve</h3>
+
+<p>We plan to achieve reasonable speedup on both CPU implementations on the Gates machines and CUDA implementations on the NVidia Kepler architecture GPUs.</p>
+
+<h3>Hope to Achieve</h3>
+
+<p>Visual demo of real-time approximate string matching on one or both of the following:</p>
+
+<ul>
+<li>Matching an input string against a large body of text and finding the best location.</li>
+<li>Matching an input string against many smaller bodies of text and listing these bodies of text from closest match to worst match.</li>
+</ul>
+
+<h3>Demo</h3>
+
+<p>At minimum, a speed-up analysis comparing the sequential and parallel execution times.</p>
+
+<h2>Schedule</h2>
+
+<ul>
+<li><del>04/07 &ndash; 04/13: Discuss potential algorithms with Hongyi. Begin conceptualizing a framework for the product.</del></li>
+<li><del>04/14 &ndash; 04/17: Serial implementation complete, working on parallel implementation.</del></li>
+<li>04-18 &ndash; 04/20:
+
+<ul>
+<li><strong>Cary</strong>: Write working parallel CPU implementation based on the bit-vector approach.</li>
+<li><strong>Kevin</strong>: Write a pthread parallel implementation using the &ldquo;diagonal&rdquo; approach.</li>
+</ul></li>
+<li>04/21 &ndash; 04/24:
+
+<ul>
+<li><strong>Cary</strong>: Optimize and benchmark CPU implementation of bit-vector algorithm.</li>
+<li><strong>Kevin</strong>: Optimize and benchmark pthread parallel implementation.</li>
+</ul></li>
+<li>04/25 &ndash; 04/27:
+
+<ul>
+<li><strong>Cary</strong>: Begin work on CUDA implementation of bit-vector algorithm, assess maximum speedup achievable and limitations on the graphics card.</li>
+<li><strong>Kevin</strong>: Attempt to add SIMD to existing pthread implementation.</li>
+</ul></li>
+<li>04/28 &ndash; 05/01:
+
+<ul>
+<li><strong>Cary</strong>: Optimize and benchmark CUDA implementation of bit-vector algorithm.</li>
+<li><strong>Kevin</strong>: Optimize SIMD application to existing pthread implementation.</li>
+</ul></li>
+<li>05/02 &ndash; 05/04:
+
+<ul>
+<li><strong>Both</strong>: Begin working on write-up. Write code for demo platform.</li>
+</ul></li>
+<li>05/05 &ndash; 05/08:
+
+<ul>
+<li><strong>Both</strong>: Polish web-page before 05/06, polish write-up, wrap-up demo implementation and prepare presentation.</li>
+</ul></li>
+</ul>
+
+    </div>
+  </div>
+  
+  <script src="javascripts/all-2229cc6f.js" type="text/javascript"></script>
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
