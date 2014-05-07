@@ -13,19 +13,13 @@ int edit_distance_diag(char* s1, int n1, char* s2, int n2);
 int edit_distance_diag_parallel(char* s1, int n1, char* s2, int n2, int num_threads);
 void* worker_function(void* ptr);
 
-
 // worker data for edit distance diag parallel
 struct worker_data {
 	int serial_rounds;
-	char* s1;
-	char* s2;
-	int n1;
-	int n2;
-	int* prevDiagA;
-	int* prevDiagB;
-	int* curDiag;
-	int tid;
-	int num_threads;
+	char* s1; char* s2;
+	int n1; int n2;
+	int* prevDiagA; int* prevDiagB; int* curDiag;
+	int tid; int num_threads;
 	pthread_barrier_t* barr_ptr;
 };
 
@@ -33,7 +27,7 @@ int num_threads_global = 6;
 
 int main(int argc, char** argv) {
 	
-	int size_left = 50000, size_right = 100000;
+	int size_left = 50000, size_right = 50000;
 	char* left = random_string(size_left);
 	char* right = random_string(size_right);
 	printf("Left Size: %d Right Size: %d\n", size_left, size_right);
@@ -55,7 +49,6 @@ int main(int argc, char** argv) {
 	endTime = CycleTimer::currentSeconds();
 	printf("Edit Distance Diag Parallel: %f seconds\n", (endTime-startTime));
 
-	
 	return 0;
 }
 
@@ -64,7 +57,6 @@ inline int min(int a, int b, int c) {
 	return x < c ? x : c;
 }
 
-
 int edit_distance_diag_parallel(char* s1, int n1, char* s2, int n2, int num_threads) {
 	// Make s2 longer
 	if (n1 > n2) {
@@ -72,7 +64,6 @@ int edit_distance_diag_parallel(char* s1, int n1, char* s2, int n2, int num_thre
 		s1 = s2; n1 = n2;
 		s2 = tempS; n2 = tempN;
 	}
-	
 	int* prevDiagA = (int*)malloc(sizeof(int)*(n1+1));
 	int* prevDiagB = (int*)malloc(sizeof(int)*(n1+1));
 	int* curDiag = (int*)malloc(sizeof(int)*(n1+1));
@@ -85,16 +76,13 @@ int edit_distance_diag_parallel(char* s1, int n1, char* s2, int n2, int num_thre
 	worker_data* datas = (worker_data*)malloc(sizeof(worker_data)*num_threads);
 	for (int i = 0; i < num_threads; i++) {
 		datas[i].serial_rounds = serial_rounds;
-		datas[i].s1 = s1; 
-		datas[i].s2 = s2;
-		datas[i].n1 = n1; 
-		datas[i].n2 = n2;
+		datas[i].s1 = s1; datas[i].s2 = s2;
+		datas[i].n1 = n1; datas[i].n2 = n2;
 		datas[i].prevDiagA = prevDiagA; 
 		datas[i].prevDiagB = prevDiagB;
 		datas[i].curDiag = curDiag;
-		datas[i].tid = i;
+		datas[i].tid = i; datas[i].num_threads = num_threads;
 		datas[i].barr_ptr = &barr;
-		datas[i].num_threads = num_threads;
 	}
 	
 	pthread_t tids[num_threads];
@@ -108,11 +96,11 @@ int edit_distance_diag_parallel(char* s1, int n1, char* s2, int n2, int num_thre
 	int ans;
 	switch ((n1 + n2 + 1) % 3) {
 		case 0:
-			ans = curDiag[0];
+			ans = curDiag[0]; break;
 		case 1:
-			ans = prevDiagA[0];
+			ans = prevDiagA[0]; break;
 		case 2:
-			ans = prevDiagB[0];
+			ans = prevDiagB[0]; break;
 		}
 	free(prevDiagA); free(prevDiagB); free(curDiag);
 	return ans;;
@@ -145,8 +133,7 @@ void* worker_function(void* ptr) {
 		prevDiagA[0] = 0; // illustration
 		prevDiagB[0] = 1;
 		prevDiagB[1] = 1;
-
-		for (int a = 2; a < serial_rounds; a++) {
+		for (int a = 2; a <= serial_rounds; a++) {
 			curDiag[0] = a;
 			curDiag[a] = a;
 			for (int i = 1; i < a; i++) {
@@ -169,7 +156,7 @@ void* worker_function(void* ptr) {
 		pthread_barrier_wait(barr_ptr);
 
 	if (tid != 0) {
-		switch (serial_rounds % 3) {
+		switch ((serial_rounds+1) % 3) {
 		case 0: {
 			int* temp = curDiag;
 			curDiag = prevDiagA;
@@ -188,7 +175,7 @@ void* worker_function(void* ptr) {
 		}
 	}
 
-	for (int a = serial_rounds; a <= n1; a++) {
+	for (int a = serial_rounds + 1; a <= n1; a++) {
 		if (tid == 0) {
 			curDiag[0] = a;
 			curDiag[a] = a;
