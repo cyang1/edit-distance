@@ -1,0 +1,16 @@
+Left Size: 50000 Right Size: 50000
+Distance: 43947
+Edit Distance Row: 8.347869 seconds
+Distance: 43947
+Edit Distance Diag: 5.215763 seconds
+Distance: 43947
+Edit Distance Diag Parallel: 1.539159 seconds
+
+
+Left Size: 50000 Right Size: 100000
+Distance: 80859
+Edit Distance Row: 16.839074 seconds
+Distance: 80859
+Edit Distance Diag: 10.324378 seconds
+Distance: 80857
+Edit Distance Diag Parallel: 3.276414 seconds
