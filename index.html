@@ -38,14 +38,16 @@
         <ul>
           <li><a href="proposal.html">Proposal</a></li>
           <li><a href="checkpoint.html">Checkpoint</a></li>
-          <li><a href="#" disabled="true" title="May 9th">Final Writeup</a></li>
+          <li><a href="final-parallel-edit.pdf">Final Writeup</a></li>
         </ul>
       </nav>
     </div>
   </header>
   <div class="container cf">
     <div id="main" role="main" class="cf">
-      <h2>The Problem</h2>
+      <h6><a href="final-parallel-edit.pdf"><i class="icon ion-document-text"></i> Link to Final Writeup</a></h6>
+
+<h2>The Problem</h2>
 
 <p>Here, we investigate approaches to parallelizing the approximate string matching problem, a specific case of the classical edit distance problem. The edit distance problem is the canonical dynamic programming problem and involves finding the number of individual character insertions, deletions, and substitutions to transform one string into another string. The related approximate string matching problem, investigated here, involves finding all positions in one string such that some substring ending at that position in the string has an edit distance less than a specified $k$ with a second string. As a dynamic programming problem, the traditional solution involves a chain of dependencies that renders parallelization extremely difficult, thus, we investigate several different approaches to attempt to resolve this issue.</p>
 
