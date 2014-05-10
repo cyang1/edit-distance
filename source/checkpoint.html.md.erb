@@ -1,0 +1,55 @@
+---
+title: Project Checkpoint
+---
+
+# Project Checkpoint
+
+## Work Completed So Far
+
+Having met with Hongyi, a researcher in this field, we now have several avenues of approach for implementing a parallelized edit distance. He pointed us towards a [fast bit-vector algorithm for approximate string matching](http://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf), which shows promise in parallization over the naive approach.
+
+A serial implementation along with a timing mechanism is now complete; multiple input formats are supported. The gathering of necessary libraries and code bases are now complete, allowing us to begin implementation without further obstruction.
+
+## Goals/Deliverables
+
+### Challenges
+
+The primary challenge in the pthread implementation (with diagonal parallelization on the DP table) lies in dealing with dynamic scheduling and resource allocation which is necessitated by the non-static nature of the amount of parallelism available throughout a single problem instance. Furthermore, we must be careful in how we arrange data on memory in order to take advantage of locality. Currently, we plan on a “diagonal-major” ordering of the DP table. However, this is non-trivial as the diagonals are of variable length.
+
+For the bit-vector implementation, the main challenge lies in communicating the information at each step between the parallel executing units. A simpler solution might just be to keep all the execution between one warp on the GPU so that the algorithm runs in lock-step, but this limits the possible speedup and the input size. If this were implemented on multiple warps, it is likely that barriers would have to be used, reducing the potential speedup.
+
+### Plan to Achieve
+
+We plan to achieve reasonable speedup on both CPU implementations on the Gates machines and CUDA implementations on the NVidia Kepler architecture GPUs.
+
+### Hope to Achieve
+
+Visual demo of real-time approximate string matching on one or both of the following:
+
+* Matching an input string against a large body of text and finding the best location.
+* Matching an input string against many smaller bodies of text and listing these bodies of text from closest match to worst match.
+
+### Demo
+
+At minimum, a speed-up analysis comparing the sequential and parallel execution times.
+
+## Schedule
+
+* ~~04/07 -- 04/13: Discuss potential algorithms with Hongyi. Begin conceptualizing a framework for the product.~~
+* ~~04/14 -- 04/17: Serial implementation complete, working on parallel implementation.~~
+* 04-18 -- 04/20:
+	- **Cary**: Write working parallel CPU implementation based on the bit-vector approach.
+	- **Kevin**: Write a pthread parallel implementation using the "diagonal" approach.
+* 04/21 -- 04/24:
+	- **Cary**: Optimize and benchmark CPU implementation of bit-vector algorithm.
+	- **Kevin**: Optimize and benchmark pthread parallel implementation.
+* 04/25 -- 04/27:
+	- **Cary**: Begin work on CUDA implementation of bit-vector algorithm, assess maximum speedup achievable and limitations on the graphics card.
+	- **Kevin**: Attempt to add SIMD to existing pthread implementation.
+* 04/28 -- 05/01:
+	- **Cary**: Optimize and benchmark CUDA implementation of bit-vector algorithm.
+	- **Kevin**: Optimize SIMD application to existing pthread implementation.
+* 05/02 -- 05/04:
+	- **Both**: Begin working on write-up. Write code for demo platform.
+* 05/05 -- 05/08:
+	- **Both**: Polish web-page before 05/06, polish write-up, wrap-up demo implementation and prepare presentation.

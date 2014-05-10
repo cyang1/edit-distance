@@ -1,55 +1,47 @@
 ---
-title: Project Checkpoint
+title: Parallel Approaches to Approximate String Matching
 ---
 
-# Project Checkpoint
+###### [<i class="icon ion-document-text"></i> Link to Final Writeup](final-parallel-edit.pdf)
 
-## Work Completed So Far
+## The Problem
 
-Having met with Hongyi, a researcher in this field, we now have several avenues of approach for implementing a parallelized edit distance. He pointed us towards a [fast bit-vector algorithm for approximate string matching](http://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf), which shows promise in parallization over the naive approach.
+Here, we investigate approaches to parallelizing the approximate string matching problem, a specific case of the classical edit distance problem. The edit distance problem is the canonical dynamic programming problem and involves finding the number of individual character insertions, deletions, and substitutions to transform one string into another string. The related approximate string matching problem, investigated here, involves finding all positions in one string such that some substring ending at that position in the string has an edit distance less than a specified $k$ with a second string. As a dynamic programming problem, the traditional solution involves a chain of dependencies that renders parallelization extremely difficult, thus, we investigate several different approaches to attempt to resolve this issue.
 
-A serial implementation along with a timing mechanism is now complete; multiple input formats are supported. The gathering of necessary libraries and code bases are now complete, allowing us to begin implementation without further obstruction.
+## Our Approach
 
-## Goals/Deliverables
+We took two approaches to this problem: directly parallelizing the traditional bottom-up dynamic programming algorithm, and a parallel bit-vector algorithm, and offer performance comparisons between the two different approaches.
 
-### Challenges
+### Parallel Dynamic Programming
 
-The primary challenge in the pthread implementation (with diagonal parallelization on the DP table) lies in dealing with dynamic scheduling and resource allocation which is necessitated by the non-static nature of the amount of parallelism available throughout a single problem instance. Furthermore, we must be careful in how we arrange data on memory in order to take advantage of locality. Currently, we plan on a “diagonal-major” ordering of the DP table. However, this is non-trivial as the diagonals are of variable length.
+In the traditional dynamic programming (DP) approach, the edit distance can be obtained by evaluating a NxM matrix where N and M are the lengths of the inputs. In this DP matrix, the value of each entry depends exactly on the values of the entries above, to the left, and to the upper-left. This results in anti-diagonal rows whose entries may be evaluated independently (provided that the previous diagonals have already been computed). The number of diagonals is precisely N+M+1; however, they are not of uniform lengths. This poses a challenge in data layout and work allocation between multiple threads.
 
-For the bit-vector implementation, the main challenge lies in communicating the information at each step between the parallel executing units. A simpler solution might just be to keep all the execution between one warp on the GPU so that the algorithm runs in lock-step, but this limits the possible speedup and the input size. If this were implemented on multiple warps, it is likely that barriers would have to be used, reducing the potential speedup.
+In order to achieve greater spatial locality, the DP table entries are laid in “diagonal-major” order. To save a substantial amount of memory (as opposed to allocating the entire DP table), we note that we only need to store at most three diagonals at any given iteration. This allows the algorithm to run in O(min(M,N)) space and O(M*N) time.
 
-### Plan to Achieve
+Our implementation processes the initial diagonals up to a certain size. Afterwards, each diagonal is split (chunked) evenly among the available threads. In the image below, each color represents the region of the table which is processed by a particular thread.
 
-We plan to achieve reasonable speedup on both CPU implementations on the Gates machines and CUDA implementations on the NVidia Kepler architecture GPUs.
+<%= image_tag 'divisionOfWork.jpg', :style => "max-width:80%" %>
 
-### Hope to Achieve
 
-Visual demo of real-time approximate string matching on one or both of the following:
+The aforementioned method generates the following speedup over a serial row-order evaluation of the DP table.
 
-* Matching an input string against a large body of text and finding the best location.
-* Matching an input string against many smaller bodies of text and listing these bodies of text from closest match to worst match.
+<%= image_tag 'traditionalSpeedup.jpg', :style => "max-width:80%" %>
 
-### Demo
+### Bit-vector Approach
 
-At minimum, a speed-up analysis comparing the sequential and parallel execution times.
+The bit-vector approach makes the insight that the dynamic programming matrix created in the bottom-up approach is fully defined by the differences in the values of adjacent cells, and that furthermore, these differences are either -1, 0, or 1.
 
-## Schedule
+For example, in the below image, we can see the complete dynamic programming matrix for approximate string matching of ‘match’ against ‘remachine’. The right-hand side represents the same matrix, but displays the only differences between vertically adjacent cells, using P to represent +1 and M to represent -1.
 
-* ~~04/07 -- 04/13: Discuss potential algorithms with Hongyi. Begin conceptualizing a framework for the product.~~
-* ~~04/14 -- 04/17: Serial implementation complete, working on parallel implementation.~~
-* 04-18 -- 04/20:
-	- **Cary**: Write working parallel CPU implementation based on the bit-vector approach.
-	- **Kevin**: Write a pthread parallel implementation using the "diagonal" approach.
-* 04/21 -- 04/24:
-	- **Cary**: Optimize and benchmark CPU implementation of bit-vector algorithm.
-	- **Kevin**: Optimize and benchmark pthread parallel implementation.
-* 04/25 -- 04/27:
-	- **Cary**: Begin work on CUDA implementation of bit-vector algorithm, assess maximum speedup achievable and limitations on the graphics card.
-	- **Kevin**: Attempt to add SIMD to existing pthread implementation.
-* 04/28 -- 05/01:
-	- **Cary**: Optimize and benchmark CUDA implementation of bit-vector algorithm.
-	- **Kevin**: Optimize SIMD application to existing pthread implementation.
-* 05/02 -- 05/04:
-	- **Both**: Begin working on write-up. Write code for demo platform.
-* 05/05 -- 05/08:
-	- **Both**: Polish web-page before 05/06, polish write-up, wrap-up demo implementation and prepare presentation.
+<%= image_tag 'bitVectorDP.jpg', :style => "max-width:80%" %>
+
+
+It turns out that when represented in this way, we can use a single bit for each cell and compute each column of the delta matrix entirely in parallel using only bitwise operations! Details of this approach can be found in the original paper [[1]](#gene1999bit).
+
+However, while this seems very promising, parallelizing the algorithm for inputs longer than the number of bits in the largest primitive (usually 64 bits for a `long long`) proves to be difficult as a portion of the algorithm relies on the carrying property of addition, which would require an arbitrary precision addition implementation and is itself very difficult to perform in parallel effectively.
+
+The original paper does not offer a satisfactory solution to this problem, only describing an approach that sequentially processes word-sized blocks of the dynamic programming matrix, effectively limiting the speedup to a factor of 64 and failing to take advantage of considerable parallel capabilities of modern processors and graphics cards. Therefore, we are looking into effective arbitrary precision addition implementations and possible other approaches to this problem in an attempt to better utilize the numerous processing units on CPUs and GPUs and achieve an even greater speedup.
+
+## References
+
+1. <a name="gene1999bit"></a> Myers, Gene. "A fast bit-vector algorithm for approximate string matching based on dynamic programming." *Journal of the ACM (JACM)* 46.3 (1999): 395-415.
